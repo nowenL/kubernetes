@@ -210,7 +210,11 @@ func (sched *Scheduler) preempt(preemptor *v1.Pod, scheduleErr error) (string, e
 	if !util.PodPriorityEnabled() {
 		glog.V(3).Infof("Pod priority feature is not enabled. No preemption is performed.")
 		return "", nil
+	} else if util.PodPriorityEnabled() {
+		glog.V(3).Infof("Pod priority feature is enabled, but preemption is disabled. No preemption is performed.")
+		return "", nil
 	}
+
 	preemptor, err := sched.config.PodPreemptor.GetUpdatedPod(preemptor)
 	if err != nil {
 		glog.Errorf("Error getting the updated preemptor pod object: %v", err)
