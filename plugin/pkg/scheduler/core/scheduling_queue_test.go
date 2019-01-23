@@ -70,7 +70,7 @@ var highPriorityPod, medPriorityPod, unschedulablePod = v1.Pod{
 	}
 
 func TestPriorityQueue_Add(t *testing.T) {
-	q := NewPriorityQueue()
+	q := NewPriorityQueue(util.ElderPod)
 	q.Add(&medPriorityPod)
 	q.Add(&unschedulablePod)
 	q.Add(&highPriorityPod)
@@ -86,7 +86,7 @@ func TestPriorityQueue_Add(t *testing.T) {
 }
 
 func TestPriorityQueue_Pop(t *testing.T) {
-	q := NewPriorityQueue()
+	q := NewPriorityQueue(util.ElderPod)
 	go func() {
 		if p, err := q.Pop(); err != nil || p != &highPriorityPod {
 			t.Errorf("Expected: %v after Pop, but got: %v", highPriorityPod.Name, p.Name)
@@ -96,7 +96,7 @@ func TestPriorityQueue_Pop(t *testing.T) {
 }
 
 func TestPriorityQueue_Update(t *testing.T) {
-	q := NewPriorityQueue()
+	q := NewPriorityQueue(util.ElderPod)
 	q.Update(&highPriorityPod)
 	if _, exists, _ := q.activeQ.Get(&highPriorityPod); !exists {
 		t.Errorf("Expected %v to be added to activeQ.", highPriorityPod.Name)
@@ -126,7 +126,7 @@ func TestPriorityQueue_Update(t *testing.T) {
 }
 
 func TestPriorityQueue_Delete(t *testing.T) {
-	q := NewPriorityQueue()
+	q := NewPriorityQueue(util.ElderPod)
 	q.Update(&highPriorityPod)
 	q.Add(&unschedulablePod)
 	q.Delete(&highPriorityPod)
@@ -139,7 +139,7 @@ func TestPriorityQueue_Delete(t *testing.T) {
 }
 
 func TestPriorityQueue_MoveAllToActiveQueue(t *testing.T) {
-	q := NewPriorityQueue()
+	q := NewPriorityQueue(util.ElderPod)
 	q.Add(&medPriorityPod)
 	q.unschedulableQ.Add(&unschedulablePod)
 	q.unschedulableQ.Add(&highPriorityPod)
@@ -185,7 +185,7 @@ func TestPriorityQueue_AssignedPodAdded(t *testing.T) {
 		Spec: v1.PodSpec{NodeName: "machine1"},
 	}
 
-	q := NewPriorityQueue()
+	q := NewPriorityQueue(util.ElderPod)
 	q.Add(&medPriorityPod)
 	// Add a couple of pods to the unschedulableQ.
 	q.unschedulableQ.Add(&unschedulablePod)

@@ -37,6 +37,8 @@ import (
 	podutil "k8s.io/kubernetes/pkg/api/v1/pod"
 	"k8s.io/kubernetes/plugin/pkg/scheduler/algorithm/predicates"
 	priorityutil "k8s.io/kubernetes/plugin/pkg/scheduler/algorithm/priorities/util"
+	"k8s.io/kubernetes/plugin/pkg/scheduler/ext"
+	"k8s.io/kubernetes/plugin/pkg/scheduler/schedulercache"
 	"k8s.io/kubernetes/plugin/pkg/scheduler/util"
 
 	"github.com/golang/glog"
@@ -61,9 +63,9 @@ type SchedulingQueue interface {
 
 // NewSchedulingQueue initializes a new scheduling queue. If pod priority is
 // enabled a priority queue is returned. If it is disabled, a FIFO is returned.
-func NewSchedulingQueue() SchedulingQueue {
+func NewSchedulingQueue(cache schedulercache.Cache) SchedulingQueue {
 	if util.PodPriorityEnabled() {
-		return NewPriorityQueue()
+		return NewPriorityQueue(ext.NewGPUUsagePriortizer(cache).Prioritize)
 	}
 	return NewFIFO()
 }
@@ -171,9 +173,10 @@ type PriorityQueue struct {
 // Making sure that PriorityQueue implements SchedulingQueue.
 var _ = SchedulingQueue(&PriorityQueue{})
 
-func NewPriorityQueue() *PriorityQueue {
+func NewPriorityQueue(lessFu LessFunc) *PriorityQueue {
 	pq := &PriorityQueue{
-		activeQ:        newHeap(cache.MetaNamespaceKeyFunc, util.HigherPriorityPod),
+		// activeQ:        newHeap(cache.MetaNamespaceKeyFunc, util.HigherPriorityPod),
+		activeQ:        newHeap(cache.MetaNamespaceKeyFunc, lessFu),
 		unschedulableQ: newUnschedulablePodsMap(),
 	}
 	pq.cond.L = &pq.lock

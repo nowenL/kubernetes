@@ -162,7 +162,7 @@ func NewConfigFactory(
 	c := &configFactory{
 		client:                         client,
 		podLister:                      schedulerCache,
-		podQueue:                       core.NewSchedulingQueue(),
+		podQueue:                       core.NewSchedulingQueue(schedulerCache),
 		pVLister:                       pvInformer.Lister(),
 		pVCLister:                      pvcInformer.Lister(),
 		serviceLister:                  serviceInformer.Lister(),

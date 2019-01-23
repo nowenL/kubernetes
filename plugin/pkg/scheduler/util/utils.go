@@ -118,3 +118,12 @@ func (l *SortableList) Sort() {
 func HigherPriorityPod(pod1, pod2 interface{}) bool {
 	return GetPodPriority(pod1.(*v1.Pod)) > GetPodPriority(pod2.(*v1.Pod))
 }
+
+// ElderPod return true when creation timestamp of the first pod is earlier than
+// the second one.
+func ElderPod(pod1, pod2 interface{}) bool {
+	time1 := pod1.(*v1.Pod).GetCreationTimestamp()
+	time2 := pod2.(*v1.Pod).GetCreationTimestamp()
+
+	return time1.Before(&time2)
+}
